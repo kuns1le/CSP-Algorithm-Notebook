@@ -8,15 +8,17 @@
 | --- | --- |
 | 单组、多组、读到 EOF、整行、矩阵、图 | [输入格式模板](docs/01-input.md) |
 | 容器选择、排序、查找、去重、堆 | [STL 速查](docs/02-stl.md) |
-| 遍历、连通块、无权最短路、回溯 | [BFS / DFS](docs/03-bfs-dfs.md) |
-| 有序查找、答案二分、单调性 | [二分](docs/04-binary-search.md) |
-| 排序后选择、区间调度、交换论证 | [贪心](docs/05-greedy.md) |
-| 图的存储、最短路、并查集、拓扑排序 | [图论](docs/06-graphs.md) |
+| 网格连通块、传送门、无权最短路、回溯 | [BFS / DFS](docs/03-bfs-dfs.md) |
+| 有序查找、答案二分、合法边界、跳石头 | [二分](docs/04-binary-search.md) |
+| 区间调度、分数背包、中位数距离和 | [贪心](docs/05-greedy.md) |
+| 邻接矩阵/表、Floyd、Dijkstra、并查集、拓扑排序 | [图论](docs/06-graphs.md) |
 | 静态区间和、批量区间修改、二维公式 | [前缀和 / 差分](docs/07-prefix-difference.md) |
 | 质数、筛法、gcd/lcm、取模、快速幂 | [数学技巧](docs/08-math.md) |
 | 根据约束筛选算法、时间和空间估算 | [复杂度与算法判断](docs/09-complexity.md) |
 | 提交前检查、常见错误与复盘 | [易错点 / 错题](docs/10-pitfalls.md) |
+| 选/不选、位运算、子集和、set 去重 | [状态枚举](docs/11-bitmask.md) |
 | 找不小于 X 的最小质数 | [例题分析](problems/next-prime.md) · [完整程序](examples/next-prime.cpp) |
+| 运行本次学习的数值与网格示例 | [完整程序与输入](#完整程序与输入) |
 | 复制常用函数 | [算法模板代码](templates/algorithms.hpp) · [程序骨架](templates/main.cpp) |
 | 每次学习后如何增量更新 | [更新约定](CONTRIBUTING.md) |
 | 每次变动记录 | [CHANGELOG](CHANGELOG.md) |
@@ -51,6 +53,20 @@ g++ -std=c++17 -O2 -Wall -Wextra -pedantic examples/next-prime.cpp -o build/next
 ~~~
 
 运行 build/smoke（Windows 为 build/smoke.exe）。例题手动输入 20、2、99992，预期分别为 23、2、100003。build 已存在时无需重复创建。
+
+## 完整程序与输入
+
+以下程序均调用现有模板头文件，可按上面的编译命令替换源文件和输出名运行。表中顶点输入编号为 1..n，字符网格每行无空格；示例详细规则见对应主题。
+
+| 程序 | 输入格式 | 输出 |
+| --- | --- | --- |
+| [grid-components.cpp](examples/grid-components.cpp) | R C，随后 R 行 01 网格 | 四方向的 1 连通块数 |
+| [grid-portals.cpp](examples/grid-portals.cpp) | R C，随后含 S/T、#、.、成对字母的网格 | 最少步数；不可达为 -1 |
+| [jump-stones.cpp](examples/jump-stones.cpp) | L n m，随后 n 个中间石头位置 | 最优最短跳跃距离 |
+| [floyd.cpp](examples/floyd.cpp) | n m q，m 条无向非负边 u v w，q 对查询 u v | 每对的最短距离；不可达为 -1 |
+| [subset-sums.cpp](examples/subset-sums.cpp) | n（0..20），随后 n 个数 | 不同子集和的数量，包含空集 |
+| [fractional-knapsack.cpp](examples/fractional-knapsack.cpp) | n capacity，随后 n 对重量和价值 | 最大价值，示例保留两位小数 |
+| [median-distance.cpp](examples/median-distance.cpp) | n，随后 n 个坐标 | 最小绝对距离和 |
 
 ## 后续学习
 

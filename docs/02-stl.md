@@ -74,10 +74,22 @@ auto cnt = count(a.begin(), a.end(), x);
 
 accumulate 的初值决定累加类型，求 long long 和时不要写 0。min_element 对空区间返回 end。
 
+## map 统计频次：键是否存在与出现次数
+
+~~~cpp
+map<long long,int> freq;
+for (long long x : a) ++freq[x]; // 统计时有意创建缺少的键。
+auto it = freq.find(x);         // 查询不改变容器。
+int occurrences = it == freq.end() ? 0 : it->second;
+~~~
+
+map 的 count(x) 只返回键是否存在（0 或 1），原数组中的频次是 it->second。freq[x] 在键不存在时会插入默认值 0；仅查询用 find。设有 K 个不同的键，建表 O(n log(K+1))、每次查询 O(log(K+1))、空间 O(K)。
+
+std::find 在 vector 上线性扫描；map.find 使用容器索引。值域小且非负时可用频次数组。一次查找还是先排序/建表，结合查询次数判断，见 [复杂度与查找取舍](09-complexity.md#枚举还是建立查找结构)。
+
 ## 迭代器与边界
 
 - vector 扩容可能使已有指针、引用和迭代器失效；erase 后被删位置及后方迭代器失效。
 - erase 遍历可用 it = container.erase(it)，具体以容器支持的重载为准。
 - multiset.erase(value) 会删除所有等于 value 的元素；只删一个先 find，再 erase(iterator)。
 - size() 通常为无符号类型；空容器不要直接计算 size()-1。
-- map 查找只想判断存在时用 find，不要顺手用下标插入。

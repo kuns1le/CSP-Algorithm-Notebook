@@ -1,11 +1,14 @@
 #pragma once
 #include <algorithm>
+#include <cstdlib>
 #include <functional>
 #include <limits>
 #include <numeric>
 #include <queue>
+#include <set>
 #include <stack>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -52,6 +55,68 @@ inline std::vector<int> dfs_order(const Graph& g, int source) {
     return order;
 }
 
+// Four-neighbor components of '1' cells in a rectangular binary grid.
+// Empty grid returns 0. O(rows*cols) time and extra space.
+inline int grid_components(const std::vector<std::string>& grid) {
+    if (grid.empty()) return 0;
+    int n = static_cast<int>(grid.size()), m = static_cast<int>(grid[0].size());
+    std::vector<std::vector<bool>> seen(n, std::vector<bool>(m, false));
+    const int dx[] = {1,-1,0,0}, dy[] = {0,0,1,-1};
+    int count = 0;
+    for (int i=0; i<n; ++i) for (int j=0; j<m; ++j) {
+        if (grid[i][j]!='1' || seen[i][j]) continue;
+        ++count;
+        std::stack<std::pair<int,int>> st;
+        seen[i][j] = true; st.push({i,j});
+        while (!st.empty()) {
+            auto [x,y] = st.top(); st.pop();
+            for (int k=0; k<4; ++k) {
+                int nx=x+dx[k], ny=y+dy[k];
+                if (nx<0 || nx>=n || ny<0 || ny>=m) continue;
+                if (grid[nx][ny]!='1' || seen[nx][ny]) continue;
+                seen[nx][ny] = true; st.push({nx,ny});
+            }
+        }
+    }
+    return count;
+}
+
+// Nonempty rectangular grid: '.', '#', exactly one S and T.
+// Other uppercase letters occur in pairs. Entering a portal and teleporting
+// is ONE move; arrival at its exit does not trigger another teleport.
+// Returns -1 if unreachable. O(rows*cols) time and extra space.
+inline int grid_portal_distance(const std::vector<std::string>& grid) {
+    int n = static_cast<int>(grid.size()), m = static_cast<int>(grid[0].size());
+    std::pair<int,int> start{-1,-1}, target{-1,-1};
+    std::vector<std::vector<std::pair<int,int>>> portals(26);
+    for (int i=0; i<n; ++i) for (int j=0; j<m; ++j) {
+        char c=grid[i][j];
+        if (c=='S') start={i,j};
+        else if (c=='T') target={i,j};
+        else if ('A'<=c && c<='Z') portals[c-'A'].push_back({i,j});
+    }
+    std::vector<std::vector<int>> dist(n, std::vector<int>(m,-1));
+    std::queue<std::pair<int,int>> q;
+    dist[start.first][start.second]=0; q.push(start);
+    const int dx[] = {1,-1,0,0}, dy[] = {0,0,1,-1};
+    while (!q.empty()) {
+        auto [x,y]=q.front(); q.pop();
+        for (int k=0; k<4; ++k) {
+            int nx=x+dx[k], ny=y+dy[k];
+            if (nx<0 || nx>=n || ny<0 || ny>=m || grid[nx][ny]=='#') continue;
+            char c=grid[nx][ny];
+            if ('A'<=c && c<='Z' && c!='S' && c!='T') {
+                const auto& p=portals[c-'A'];
+                auto exit=(p[0]==std::make_pair(nx,ny) ? p[1] : p[0]);
+                nx=exit.first; ny=exit.second;
+            }
+            if (dist[nx][ny]!=-1) continue;
+            dist[nx][ny]=dist[x][y]+1; q.push({nx,ny});
+        }
+    }
+    return dist[target.first][target.second];
+}
+
 // Predicate on [lo, hi) must be false...false,true...true.
 // Returns the original hi when no true exists, including an empty interval.
 // Require 0 <= lo <= hi <= LLONG_MAX. O(log(hi-lo+1)) predicate calls.
@@ -63,6 +128,38 @@ ll first_true(ll lo, ll hi, Predicate ok) {
         else lo = mid + 1;
     }
     return lo;
+}
+
+// Predicate on CLOSED [lo,hi] must be true...true,false...false; ok(lo) is true.
+// Require 0 <= lo <= hi <= LLONG_MAX. O(log(hi-lo+1)) predicate calls.
+template<class Predicate>
+ll last_true(ll lo, ll hi, Predicate ok) {
+    while (lo<hi) {
+        ll mid=hi-(hi-lo)/2; // Upper midpoint, without overflowing hi-lo+1.
+        if (ok(mid)) lo=mid;
+        else hi=mid-1;
+    }
+    return lo;
+}
+
+// Endpoints 0 and length cannot be removed. Require length>=1,
+// distinct stones strictly inside (0,length), 0<=max_removed<=stones.size().
+// O(n log n + n log(length+1)) time, O(n) input-copy space.
+inline ll max_min_stone_gap(ll length, std::vector<ll> stones, int max_removed) {
+    std::sort(stones.begin(), stones.end());
+    auto feasible=[&](ll gap) {
+        int removed=0;
+        ll last=0;
+        for (ll x:stones) {
+            if (x-last<gap) ++removed;
+            else last=x;
+        }
+        // If the last segment is too short, remove the last kept interior stone.
+        // Only the count is needed; neither endpoint is actually removed.
+        if (length-last<gap) ++removed;
+        return removed<=max_removed;
+    };
+    return last_true(0,length,feasible);
 }
 
 // Maximum count of pairwise nonoverlapping half-open intervals [l,r).
@@ -77,6 +174,35 @@ inline int max_nonoverlap(std::vector<std::pair<ll,ll>> intervals) {
         if (l >= end) { ++count; end = r; }
     }
     return count;
+}
+
+struct FractionalItem { int weight, value; };
+// Divisible items, capacity>=0, 1<=weight<=1e9, 0<=value<=1e9.
+// Exact density ordering by safe long long products; floating-point total.
+// O(n log n) time, O(n) input-copy space.
+inline long double fractional_knapsack(ll capacity, std::vector<FractionalItem> items) {
+    std::sort(items.begin(), items.end(), [](const auto& a, const auto& b) {
+        return 1LL*a.value*b.weight > 1LL*b.value*a.weight;
+    });
+    long double answer=0;
+    for (auto item:items) {
+        ll take=std::min(capacity,1LL*item.weight);
+        answer+=static_cast<long double>(item.value)*take/item.weight;
+        capacity-=take;
+        if (capacity==0) break;
+    }
+    return answer;
+}
+
+// Minimize sum |x-p| by choosing a median. Empty input returns 0.
+// Pairwise differences and the total must fit long long.
+// O(n log n) time, O(n) input-copy space.
+inline ll min_absolute_distance_sum(std::vector<ll> positions) {
+    if (positions.empty()) return 0;
+    std::sort(positions.begin(), positions.end());
+    ll median=positions[positions.size()/2], total=0;
+    for (ll x:positions) total+=std::abs(x-median);
+    return total;
 }
 
 class DSU {
@@ -126,6 +252,19 @@ inline std::vector<ll> dijkstra(const WeightedGraph& g, int source) {
             }
         }
     }
+    return dist;
+}
+
+// Square matrix: diagonal 0, absent edges INF, parallel edges minimized.
+// Finite entries must be in [0,INF); finite shortest distances must be < INF.
+// O(V^3) time and O(V^2) matrix space (the parameter is passed by value).
+inline std::vector<std::vector<ll>> floyd(std::vector<std::vector<ll>> dist) {
+    int n=static_cast<int>(dist.size());
+    for (int k=0; k<n; ++k)
+        for (int i=0; i<n; ++i)
+            for (int j=0; j<n; ++j)
+                if (dist[i][k]!=INF && dist[k][j]!=INF)
+                    dist[i][j]=std::min(dist[i][j],dist[i][k]+dist[k][j]);
     return dist;
 }
 
@@ -209,5 +348,18 @@ inline ll mod_pow(ll base,ll exponent,ll mod) {
         exponent>>=1;
     }
     return result;
+}
+
+// Require n<=20 and every subset sum to fit long long. Includes the empty sum 0.
+// K distinct sums: O(2^n * (n+log(K+1))) time, O(K) result space.
+inline std::set<ll> distinct_subset_sums(const std::vector<ll>& a) {
+    int n=static_cast<int>(a.size());
+    std::set<ll> sums;
+    for (unsigned long long mask=0; mask<(1ULL<<n); ++mask) {
+        ll sum=0;
+        for (int i=0; i<n; ++i) if ((mask>>i)&1ULL) sum+=a[i];
+        sums.insert(sum);
+    }
+    return sums;
 }
 } // namespace csp

@@ -1,6 +1,6 @@
 # 贪心：证明每一步选择安全
 
-完整示例函数见 [algorithms.hpp](../templates/algorithms.hpp)：max_nonoverlap。
+完整示例函数见 [algorithms.hpp](../templates/algorithms.hpp)：max_nonoverlap、fractional_knapsack、min_absolute_distance_sum。
 
 ## 什么时候考虑
 
@@ -20,6 +20,28 @@ int answer = csp::max_nonoverlap(intervals); // 2
 ~~~
 
 时间 O(n log n)，排序后扫描 O(n)。函数按值接收区间，会复制输入并需要 O(n) 的输入副本空间。
+
+## 分数背包：物品允许切分
+
+判断信号：容量受限，每件物品可以按任意比例取走，价值也按比例计算。按单位重量价值从高到低取。若一个方案取了低密度物品，却还留有高密度物品，交换等重量部分会使价值不减，因此可依次填满高密度物品。
+
+函数约定 capacity>=0，FractionalItem 的 weight 为 1..10^9、value 为 0..10^9。比较密度使用 1LL*a.value*b.weight，两个乘积均不超过 10^18；扩大数据范围后应重新估算。总价值用 long double，输出精度由题目决定。
+
+~~~cpp
+auto value = csp::fractional_knapsack(50, {{10,60},{20,100},{30,120}}); // 240
+~~~
+
+完整程序 [fractional-knapsack.cpp](../examples/fractional-knapsack.cpp)：输入 n capacity，随后每行 weight value，示例输出保留两位小数。时间 O(n log n)，按值接收的副本空间 O(n)。边界：容量 0、空物品、容量超过总重量、密度相同、只取一部分。不可切分时改成了 0/1 背包问题，此策略不保证最优。
+
+## 中位数：最小绝对距离和
+
+选择位置 p，使 sum |a[i]-p| 最小。将排序后的首尾元素配对，一对 x<=y 的距离和在 p 属于 [x,y] 时最小；所有这些区间的交集正是中位数位置，所以取中位数即可。偶数长度时，两中位数之间任意位置均最优。
+
+~~~cpp
+auto distance = csp::min_absolute_distance_sum({1,2,8,10}); // 15，取 2 或 8 均可。
+~~~
+
+完整程序 [median-distance.cpp](../examples/median-distance.cpp)：输入 n 和 n 个坐标，输出最小总距离。函数对空输入返回 0；坐标差及总和必须可用 long long 表示。排序时间 O(n log n)，副本空间 O(n)。边界：单点、全相等、负坐标、偶数长度、大距离累加。平方距离和则应考虑平均数，不能混用结论。
 
 ## 为什么不能照搬
 

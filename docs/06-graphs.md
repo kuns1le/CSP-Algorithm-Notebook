@@ -1,6 +1,6 @@
 # 图论
 
-完整代码见 [algorithms.hpp](../templates/algorithms.hpp)：DSU、dijkstra、topo_sort；bfs 和 dfs_order 见 [搜索笔记](03-bfs-dfs.md)。
+完整代码见 [algorithms.hpp](../templates/algorithms.hpp)：DSU、dijkstra、floyd、topo_sort；bfs 和 dfs_order 见 [搜索笔记](03-bfs-dfs.md)。
 
 ## 先问清图的性质
 
@@ -12,13 +12,18 @@
 | 最少边数 / 等权最短路 | BFS | 各边代价相同 |
 | 非负权单源最短路 | 堆 Dijkstra | 本模板 O((V+E)log(V+E))；简单图常写 O((V+E)log V) |
 | 有负边的单源最短路 | Bellman-Ford 等 | Bellman-Ford O(VE)，需判断可达负环；本仓库暂未提供此模板 |
-| 小规模所有点对最短路 | Floyd | O(V³) 时间、O(V²) 空间；本仓库暂未提供此模板 |
+| 小规模所有点对最短路 | Floyd | O(V³) 时间、O(V²) 空间；本模板使用非负边权 |
 | 合并集合、无向连通关系 | 并查集 | 路径压缩+按大小合并，均摊 O(α(V)) |
 | 依赖顺序、有向无环图判定 | 拓扑排序 | O(V+E)；输出不足 V 个顶点说明有环 |
 
 ## 存储
 
-邻接表空间 O(V+E)，适合稀疏图；无向边存两次。邻接矩阵空间 O(V²)，适合规模足够小且需要频繁查两点之间边的情况。带权矩阵的无边值与对角线初值要分开处理。
+| 存储 | 空间 | 查一条边 | 遍历一个点的邻居 |
+| --- | --- | --- | --- |
+| 邻接表 | O(V+E) | 通常 O(deg(u)) | O(deg(u)) |
+| 邻接矩阵 | O(V²) | O(1) | O(V) |
+
+稀疏图常用邻接表，无向边存两次。规模小、经常查指定两点间边时可用矩阵。带权矩阵不能把无边都设为 0，否则与零权边混淆。
 
 ~~~cpp
 csp::WeightedGraph g(n);
@@ -31,6 +36,23 @@ if (dist[target] == csp::INF) {
 ~~~
 
 Dijkstra 模板在堆里放 (距离,顶点)，取出后跳过过期距离。所有边权必须非负；有限最短路须严格小于 INF，模板会保护距离加法。图的顶点数至少为 1，起点和所有边的端点必须有效。
+
+## Floyd：任意两点最短路
+
+~~~cpp
+vector<vector<csp::ll>> d(n, vector<csp::ll>(n, csp::INF));
+for (int i=0; i<n; ++i) d[i][i]=0;
+d[u][v]=min(d[u][v], w); // 对每条边执行；重边保留最小权。
+auto distances=csp::floyd(d);
+~~~
+
+本模板限定初始有限边权在 [0,csp::INF) 内、所有有限最短路严格小于 csp::INF；无向图还要更新反向边，自环也通过 min 保持正确初值。不可达保留 INF。
+
+令 d[i][j] 表示仅允许已处理顶点作为中间点时的最短路。处理 k 时，最短路或者不经过 k，或者分成 i→k 和 k→j，因此更新为 min(d[i][j], d[i][k]+d[k][j])。**k 必须在最外层**。先排除不可达，再相加；本模板的有限值均小于 INF=LLONG_MAX/4，两项相加不会溢出。
+
+时间 O(V³)、矩阵空间 O(V²)，按值传入会复制矩阵。算法理论上也可处理无负环的负边图，但不属于本函数约定，需另行核算负环与数值边界。
+
+完整程序 [floyd.cpp](../examples/floyd.cpp)：输入 n m q、m 条无向非负边 u v w、q 对查询顶点；输入编号为 1..n，读入时转成 0-based。输出最短距离，不可达为 -1。边界覆盖单点、重边、零权边、自环、断开图和大于 int 的距离。
 
 ## 并查集
 
