@@ -17,6 +17,7 @@
 | 根据约束筛选算法、时间和空间估算 | [复杂度与算法判断](docs/09-complexity.md) |
 | 提交前检查、常见错误与复盘 | [易错点 / 错题](docs/10-pitfalls.md) |
 | 选/不选、位运算、子集和、set 去重 | [状态枚举](docs/11-bitmask.md) |
+| 最优值、背包、方案计数、状态压缩、DP + 前缀和 | [动态规划 DP](docs/12-dp.md) |
 | 找不小于 X 的最小质数 | [例题分析](problems/next-prime.md) · [完整程序](examples/next-prime.cpp) |
 | 运行本次学习的数值与网格示例 | [完整程序与输入](#完整程序与输入) |
 | 复制常用函数 | [算法模板代码](templates/algorithms.hpp) · [程序骨架](templates/main.cpp) |
