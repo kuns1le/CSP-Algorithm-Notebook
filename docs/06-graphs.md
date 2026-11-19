@@ -75,6 +75,120 @@ bool acyclic = order.size() == g.size();
 
 每次取入度为 0 的点，删除其出边。多个入度为 0 的点意味着顺序可能不唯一。若要求字典序最小，把队列改为小根堆并重新核算复杂度。
 
+## 新学算法：最短路、连通块与拓扑排序
+
+### Dijkstra：非负边权的单源最短路
+
+固定起点 `s`；`dist[v]` 为到 `v` 的当前最短候选距离。小根堆存 `{距离,顶点}`，反复松弛邻边；`d!=dist[u]` 表示堆记录已过期。允许重边和零权边，**不能直接用于负权边**。
+
+~~~cpp
+const long long INF=1LL<<60;
+vector<long long> dist(n+1,INF);
+priority_queue<pair<long long,int>,vector<pair<long long,int>>,
+               greater<pair<long long,int>>> pq;
+dist[s]=0; pq.push({0,s});
+while(!pq.empty()){
+    auto [d,u]=pq.top(); pq.pop();
+    if(d!=dist[u]) continue;
+    for(auto [v,w]:g[u]){  // g[u] 中是 {终点,非负边权}
+        if(dist[v]>d+w){
+            dist[v]=d+w;
+            pq.push({dist[v],v});
+        }
+    }
+}
+~~~
+
+邻接表 + 堆：时间 O((N+M)log(N+M))，空间 O(N+M)。若题目要求不可达输出 `2^31-1`，用 `INT_MAX`（`<climits>`），而非 `pow(2,31)-1`。
+
+**路径收益建模**：若下坡收益为海拔差，上坡损失为海拔差的2倍，则可把有向代价改为 `w(u,v)=max(0LL,H[v]-H[u])`；最大幸福感为 `max_v(H[1]-H[v]-dist[v])`，再用 Dijkstra 求最小累计上坡代价。
+
+### 删除每条边后的无权最短路：只重算一条原最短路径上的边
+
+初次 BFS 求 1→N 的距离 D，并用 `preEdge[v]` 记录到达 `v` 的边编号；邻接表 `g[u]` 应保存边编号，边列表 `edge[id]={起点,终点}`。
+
+- 不在所选最短路径上的边，删除后原路径仍可用，所以答案仍为 D。
+- 只对这条路径上的边，禁用该边重新 BFS。
+- 若原图不可达，则全部输出 -1。
+
+~~~cpp
+int D=bfs(-1,true);  // ban=-1：不删边，true：记录 preEdge
+vector<int> ans(m,D);
+if(D!=-1){
+    int cur=n;
+    while(cur!=1){
+        int id=preEdge[cur];
+        ans[id]=bfs(id,false);    // 仅禁用编号 id 的边
+        cur=edge[id].first;       // 回溯到前驱顶点
+    }
+}
+~~~
+
+一次 BFS 为 O(N+M)，最短路径至多 N-1 条边，总时间 O(N(N+M))、空间 O(N+M)；若第一次找不到路径，不能回溯 `preEdge[n]`。
+
+### 并查集：不使用 struct 的基本模板
+
+~~~cpp
+vector<int> parent,sz;
+int findRoot(int x){
+    return parent[x]==x ? x : parent[x]=findRoot(parent[x]);
+}
+void unite(int a,int b){
+    a=findRoot(a); b=findRoot(b);
+    if(a==b) return;
+    if(sz[a]<sz[b]) swap(a,b);
+    parent[b]=a;
+    sz[a]+=sz[b];
+}
+// 初始化：parent.resize(n+1); sz.assign(n+1,1);
+// for(int i=1;i<=n;i++) parent[i]=i;
+~~~
+
+只有**根节点**的 `sz[root]` 表示集合大小；两个不同连通块合并时，新增跨集合顶点对数为 `sz[ra]*sz[rb]`。
+
+| 题型 | 顺序与贡献 |
+| --- | --- |
+| 依次拆桥后的不连通点对数 | **倒序恢复**；初始 `ans=1LL*n*(n-1)/2`；先记录当前答案，再对不同集合执行 `ans-=1LL*sz[ra]*sz[rb]` 和合并 |
+| 树上所有点对的路径**最大边权之和** | 边存为 `array<int,3>{w,u,v}`，按权重**升序**；加入边时 `ans+=1LL*w*sz[ra]*sz[rb]`，再合并 |
+| 员工共享语言可间接交流 | `first[lang]` 存最先掌握该语言的员工；后续员工同语言即合并；若至少有人懂语言，答案是连通块数-1；若所有人都不懂，答案是 n |
+
+按边权升序的理由：两个连通块**第一次连通**时，当前边权就是它们之间所有新连通点对的路径最大边权。两种合并计数都必须**先乘旧集合大小，再合并**。并查集只维护合并，不支持一般的在线删边。
+
+### 拓扑排序 Kahn：字母表顺序约束
+
+对相邻名字找**第一个不同字符**，建立 `u→v` 表示 u 必须排在 v 前；重复边只添加一次。若没有不同字符且前一个名字更长，直接 `Impossible`。
+
+~~~cpp
+vector<vector<int>> g(26);
+vector<int> indeg(26,0);
+bool has[26][26]={};
+// 比较相邻字符串：找到第一个不同字符 u,v 后
+if(!has[u][v]){
+    has[u][v]=true;
+    g[u].push_back(v);
+    indeg[v]++;
+}
+~~~
+
+~~~cpp
+queue<int> q;
+string order;
+for(int i=0;i<26;i++) if(indeg[i]==0) q.push(i);
+while(!q.empty()){
+    int u=q.front(); q.pop();
+    order+=char('a'+u); // 出队才计入答案
+    for(int v:g[u])
+        if(--indeg[v]==0) q.push(v);
+}
+// order.size()==26 且无前缀冲突才有解
+~~~
+
+入度为0表示所有前置约束已满足；不足26个字母说明有向环。O(总字符串长度+26²) 时间，额外图空间 O(26²)。
+
+### 树上固定中转点 K 的路径距离
+
+树上两点间简单路径唯一。若查询允许经过 K 后折返，先以 K 为起点 BFS/DFS **累加实际边权**求 `dist[v]`，每次答案即 `dist[x]+dist[y]`。预处理 O(N)，Q 次查询 O(Q)，无需 Dijkstra。
+
 ## 边界检查
 
 孤立点、断开的图、自环、重边、零权边、从起点不可达的点；并查集重复合并；拓扑排序的有向环。
