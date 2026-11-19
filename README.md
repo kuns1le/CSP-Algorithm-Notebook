@@ -11,13 +11,13 @@
 | 网格连通块、传送门、无权最短路、回溯 | [BFS / DFS](docs/03-bfs-dfs.md) |
 | 有序查找、答案二分、合法边界、跳石头 | [二分](docs/04-binary-search.md) |
 | 区间调度、分数背包、中位数距离和 | [贪心](docs/05-greedy.md) |
-| 邻接矩阵/表、Floyd、Dijkstra、并查集、拓扑排序 | [图论](docs/06-graphs.md) |
+| 邻接表/矩阵、Dijkstra、Floyd、并查集、拓扑排序及应用 | [图论](docs/06-graphs.md) |
 | 静态区间和、批量区间修改、二维公式 | [前缀和 / 差分](docs/07-prefix-difference.md) |
 | 质数、筛法、gcd/lcm、取模、快速幂 | [数学技巧](docs/08-math.md) |
 | 根据约束筛选算法、时间和空间估算 | [复杂度与算法判断](docs/09-complexity.md) |
 | 提交前检查、常见错误与复盘 | [易错点 / 错题](docs/10-pitfalls.md) |
 | 选/不选、位运算、子集和、set 去重 | [状态枚举](docs/11-bitmask.md) |
-| 最优值、背包、方案计数、状态压缩、DP + 前缀和 | [动态规划 DP](docs/12-dp.md) |
+| 背包、方案数、状态压缩、树形 DP、前20大合并 | [动态规划 DP](docs/12-dp.md) |
 | 找不小于 X 的最小质数 | [例题分析](problems/next-prime.md) · [完整程序](examples/next-prime.cpp) |
 | 运行本次学习的数值与网格示例 | [完整程序与输入](#完整程序与输入) |
 | 复制常用函数 | [算法模板代码](templates/algorithms.hpp) · [程序骨架](templates/main.cpp) |
