@@ -87,6 +87,44 @@ map 的 count(x) 只返回键是否存在（0 或 1），原数组中的频次�
 
 std::find 在 vector 上线性扫描；map.find 使用容器索引。值域小且非负时可用频次数组。一次查找还是先排序/建表，结合查询次数判断，见 [复杂度与查找取舍](09-complexity.md#枚举还是建立查找结构)。
 
+## 本阶段新用法：fill、array、pair 解包
+
+### fill：重置已有元素
+
+~~~cpp
+vector<int> dist(n+1);
+fill(dist.begin(),dist.end(),-1);    // [begin,end) 全部设为 -1
+fill(dist.begin()+1,dist.end(),0);   // 只设置下标 1..n
+~~~
+
+`fill(first,last,x)` 定义在 `<algorithm>`，O(区间长度)，**不改变容器大小**。与 `resize(n,x)`（改变长度，只为新增元素填 x）、`assign(n,x)`（替换成 n 个 x）区分。
+
+### array<int,3>：固定长度的三元组
+
+~~~cpp
+vector<array<int,3>> edges;          // 保存 {权重,起点,终点}
+edges.push_back({10,1,2});
+edges.push_back({5,2,3});
+sort(edges.begin(),edges.end());     // 默认按第0项，再第1项、第2项升序
+for(auto [w,u,v]:edges){ /* 使用三个字段 */ }
+~~~
+
+`array<T,3>` 是 STL 固定长度容器；`pair<T,U>` 存两个字段。C++17 的 `auto [v,w]` 称为**结构化绑定**，适合遍历 `vector<pair<...>>` 与 `vector<array<...>>`。
+
+### priority_queue<pair<...>>：Dijkstra 常用小根堆
+
+~~~cpp
+priority_queue<pair<long long,int>,
+               vector<pair<long long,int>>,
+               greater<pair<long long,int>>> pq;
+pq.push({7,3});  // {距离,顶点}
+pq.push({2,5});
+auto [d,u]=pq.top(); // d=2,u=5；堆顶最小
+pq.pop();
+~~~
+
+堆**不是排好序的数组**；仅保证堆顶是最小值。旧的距离记录不会自动删除，Dijkstra 通过 `if(d!=dist[u]) continue;` 跳过过期记录。
+
 ## 迭代器与边界
 
 - vector 扩容可能使已有指针、引用和迭代器失效；erase 后被删位置及后方迭代器失效。
