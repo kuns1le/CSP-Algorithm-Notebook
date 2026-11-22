@@ -45,6 +45,41 @@ A..T#
 
 若题目允许独立的零代价传送边，应改用 0-1 BFS；传送是否强制、是否耗时、同字母是否超过两个，均需重新建模。若还带钥匙或使用次数，访问状态可能要包含额外信息，不能只按坐标去重。
 
+## BFS + 状态哈希：八数码
+
+**状态不是空格坐标，而是整个棋盘**。用长度为 9 的字符串表示 3×3 布局，例如 `"283104765"`；一次移动就是交换字符 `'0'` 与相邻位置。普通 BFS 每步代价为1，第一次找到目标即最少交换次数。
+
+~~~cpp
+string target="123804765";
+queue<pair<string,int>> q;
+unordered_set<string> seen;
+q.push({start,0});
+seen.insert(start);
+int dr[4]={-1,1,0,0}, dc[4]={0,0,-1,1};
+
+while(!q.empty()){
+    auto [now,step]=q.front(); q.pop();
+    if(now==target){ cout<<step<<'\n'; break; }
+
+    int pos=(int)now.find('0');
+    int r=pos/3, c=pos%3;
+    for(int d=0;d<4;d++){
+        int nr=r+dr[d], nc=c+dc[d];
+        if(nr<0||nr>=3||nc<0||nc>=3) continue;
+        int np=nr*3+nc;
+        string next=now;
+        swap(next[pos],next[np]);
+        if(seen.count(next)) continue;
+        seen.insert(next);            // 入队时标记
+        q.push({next,step+1});        // 不要用 step++
+    }
+}
+~~~
+
+`unordered_set<string>` 保存已发现的**完整状态**，用于去重、防止往返循环；平均查找 O(1)，不保证遍历顺序。状态编码由字符串完成，哈希由容器完成；不能只用 `visited[r][c]` 区分棋盘。
+
+棋盘排列最多 `9!` 种，从合法初态实际可达 `9!/2` 种；每个状态最多尝试4次交换。若状态量小且可直接编号，可以改用数组 `visited[stateId]`。**只有状态包含了决定后续操作的全部信息时，去重才安全**；若题目要求统计不同路径条数，不可简单抹掉重复到达状态的所有路径。
+
 ## DFS 与连通块
 
 dfs_order 使用显式栈，适合可达性，避免深递归造成栈溢出。它的返回顺序不是递归 DFS 的退出顺序，不能直接据此计算后序动态规划。
