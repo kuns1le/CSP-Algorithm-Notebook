@@ -30,6 +30,22 @@ sort(items.begin(), items.end(), [](const auto& x, const auto& y) {
 
 比较器必须满足严格弱序，不能写成 <=。需要保留相等元素原顺序时使用 stable_sort。
 
+## 全排列：next_permutation
+
+适用：需要按**字典序**枚举所有排列，且 `n!` 的规模允许。
+
+~~~cpp
+vector<int> a={1,2,3};
+sort(a.begin(),a.end()); // 从最小排列开始
+do{
+    // 处理当前排列 a
+}while(next_permutation(a.begin(),a.end()));
+~~~
+
+`next_permutation(first,last)` 会**修改原数组**，产生紧接着的下一个字典序排列；返回 `false` 时表示已到最大排列，并把数组重排成最小排列。使用 `do...while` 才不会漏掉初始排列。每次 O(n)，枚举所有排列共 O(n·n!)。
+
+固定从城市 1 出发又回到 1 的旅行商枚举：只排列其余 `n-1` 个城市，共 `(n-1)!` 种；路径和要包含**起点到第一站、相邻站、最后一站回起点**三部分。
+
 ## 二分查找：先保证有序
 
 ~~~cpp
