@@ -1,5 +1,7 @@
 # 图论
 
+> 各类最短路算法的适配题型、原理和核心 C++ 语句集中整理在 [最短路专题](13-shortest-path.md)。
+
 完整代码见 [algorithms.hpp](../templates/algorithms.hpp)：DSU、dijkstra、floyd、topo_sort；bfs 和 dfs_order 见 [搜索笔记](03-bfs-dfs.md)。
 
 ## 先问清图的性质
