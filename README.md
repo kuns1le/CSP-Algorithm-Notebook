@@ -12,6 +12,7 @@
 | 有序查找、答案二分、合法边界、跳石头 | [二分](docs/04-binary-search.md) |
 | 区间调度、分数背包、中位数距离和 | [贪心](docs/05-greedy.md) |
 | 邻接表/矩阵、Dijkstra、Floyd、并查集、拓扑排序及应用 | [图论](docs/06-graphs.md) |
+| BFS、Dijkstra、Bellman-Ford、SPFA、Floyd、Johnson 的题型、原理与关键代码 | [最短路专题](docs/13-shortest-path.md) |
 | 静态区间和、批量区间修改、二维公式 | [前缀和 / 差分](docs/07-prefix-difference.md) |
 | 质数、筛法、gcd/lcm、取模、快速幂 | [数学技巧](docs/08-math.md) |
 | 根据约束筛选算法、时间和空间估算 | [复杂度与算法判断](docs/09-complexity.md) |
