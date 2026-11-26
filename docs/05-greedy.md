@@ -43,6 +43,35 @@ auto distance = csp::min_absolute_distance_sum({1,2,8,10}); // 15，取 2 或 8 
 
 完整程序 [median-distance.cpp](../examples/median-distance.cpp)：输入 n 和 n 个坐标，输出最小总距离。函数对空输入返回 0；坐标差及总和必须可用 long long 表示。排序时间 O(n log n)，副本空间 O(n)。边界：单点、全相等、负坐标、偶数长度、大距离累加。平方距离和则应考虑平均数，不能混用结论。
 
+## 箱子分配：小容量优先，每箱选最高价值
+
+适配题型：每件行李只能使用一次，每个箱子最多容纳一件，重量不超过箱子容量，最大化总价值。每次查询禁用原始编号 [L,R] 的箱子；必须先筛选再排序，不能提前排序原箱子数组。不是普通背包，因为不能合并箱子容量。
+
+策略：对可用箱子按容量升序处理；每个箱子从未使用且能放入的行李中选价值最大的一件。交换证明：若最优方案的小箱装了较低价值行李，而当前最高价值行李装在后面的大箱，可互换，两件都能放入且总价值不变；若最高价值行李未被使用，直接替换也不会变差。若小箱空着，也可以把后面已选的这件行李移入小箱，或直接放入未使用行李。后续继续同样选择即可。
+
+~~~cpp
+// w,v,x 均从1开始；w,v 长度 n+1，x 长度 m+1
+vector<int> box;
+for(int i=1;i<=m;i++){
+    if(i>=L && i<=R) continue;
+    box.push_back(x[i]);
+}
+sort(box.begin(),box.end());
+vector<bool> used(n+1,false);
+long long ans=0;
+for(int cap:box){
+    int best=0; // v[0]=0；本题价值均为正
+    for(int j=1;j<=n;j++)
+        if(!used[j] && w[j]<=cap && v[j]>v[best]) best=j;
+    if(best!=0){
+        used[best]=true; // 扫完所有候选后才确认选择
+        ans+=v[best];
+    }
+}
+~~~
+
+每次查询重新初始化 used、ans。box 用 push_back 创建，下标从0开始且长度可能小于 m，建议范围 for。O(Q(M log M+NM)) 时间，O(N+M) 空间，适用于 N,M,Q<=50。全部箱子禁用时答案0。另一种排序后的二维 DP 见 [DP 板子](12-dp.md)。
+
 ## 为什么不能照搬
 
 - 改成最大总收益：结束最早的区间可能收益很低，通常要考虑带权区间 DP。
