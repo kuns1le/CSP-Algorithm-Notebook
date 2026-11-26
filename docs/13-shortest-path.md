@@ -147,7 +147,7 @@ while(!q.empty()){
     int u=q.front(); q.pop();
     inq[u]=false;                    // 出队后将来仍可入队
     for(auto [v,w]:g[u]){
-        if(dist[v]>=dist[u]+w) continue;
+        if(dist[v]<=dist[u]+w) continue; // 只有严格变小才松弛
         dist[v]=dist[u]+w;
         cnt[v]=cnt[u]+1;
         if(cnt[v]>=n){negativeCycle=true;break;}
