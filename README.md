@@ -7,18 +7,19 @@
 | 想查什么 | 入口 |
 | --- | --- |
 | 单组、多组、读到 EOF、整行、矩阵、图 | [输入格式模板](docs/01-input.md) |
-| 容器选择、排序、`next_permutation`、查找、去重、堆 | [STL 速查](docs/02-stl.md) |
+| 容器选择、排序、`next_permutation`、查找、去重、堆、字符串 ASCII | [STL 速查](docs/02-stl.md) |
 | 网格连通块、八数码状态哈希、BFS 最短路、DFS 回溯 | [BFS / DFS](docs/03-bfs-dfs.md) |
-| 有序查找、答案二分、合法边界、跳石头 | [二分](docs/04-binary-search.md) |
-| 区间调度、分数背包、中位数距离和 | [贪心](docs/05-greedy.md) |
+| 有序查找、答案二分、跳石头、最大平均值 | [二分](docs/04-binary-search.md) |
+| 区间调度、分数背包、中位数距离和、箱子分配 | [贪心](docs/05-greedy.md) |
 | 邻接表/矩阵、Dijkstra、Floyd、并查集、Kruskal 最小生成树、拓扑排序及应用 | [图论](docs/06-graphs.md) |
 | BFS、Dijkstra、Bellman-Ford、SPFA、Floyd、Johnson 的题型、原理与关键代码 | [最短路专题](docs/13-shortest-path.md) |
-| 静态区间和、批量区间修改、二维公式 | [前缀和 / 差分](docs/07-prefix-difference.md) |
+| 二分图染色、连通块选择、DFS 增广路、马赛克建模 | [二分图专题](docs/14-bipartite.md) |
+| 静态区间和、最小前缀和、批量区间修改、二维公式 | [前缀和 / 差分](docs/07-prefix-difference.md) |
 | 质数、筛法、gcd/lcm、取模、快速幂 | [数学技巧](docs/08-math.md) |
 | 根据约束筛选算法、时间和空间估算 | [复杂度与算法判断](docs/09-complexity.md) |
 | 提交前检查、常见错误与复盘 | [易错点 / 错题](docs/10-pitfalls.md) |
-| 选/不选、位运算、子集和、set 去重 | [状态枚举](docs/11-bitmask.md) |
-| 背包、计数、树形 DP、子树前20大、换根 DP | [动态规划 DP](docs/12-dp.md) |
+| 选/不选、位运算、子集和、连续区间切割 OR/XOR | [状态枚举](docs/11-bitmask.md) |
+| 0/1 背包、完全背包、箱子分配、计数、树形与换根 DP | [动态规划 DP](docs/12-dp.md) |
 | 找不小于 X 的最小质数 | [例题分析](problems/next-prime.md) · [完整程序](examples/next-prime.cpp) |
 | 运行本次学习的数值与网格示例 | [完整程序与输入](#完整程序与输入) |
 | 复制常用函数 | [算法模板代码](templates/algorithms.hpp) · [程序骨架](templates/main.cpp) |
