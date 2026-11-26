@@ -20,6 +20,20 @@ auto sum = p.sum(1,3); // -1+4=3
 
 如果题目询问从 1 开始的闭区间 [L,R]，转换为模板的 [L-1,R)。总和必须能放进 long long。空区间返回 0。
 
+## 限制区间最短长度：维护最小前缀和
+
+1-based 序列 b，pre[0]=0。固定右端点 r，若区间至少 F 个元素，则可被减去的前缀和下标是 0..r−F。以 r 结尾的最大合法区间和为 pre[r]−min(pre[0..r−F])。
+
+~~~cpp
+long long minPre=0, best=LLONG_MIN;
+for(int r=F;r<=n;r++){
+    minPre=min(minPre,pre[r-F]);
+    best=max(best,pre[r]-minPre);
+}
+~~~
+
+假设 1<=F<=n。每轮保留之前的最小值，因此不是固定长度 F 的滑动窗口；如果最小值来自 pre[k]，对应区间为 [k+1,r]、长度 r−k。O(n) 时间、已有前缀和之外 O(1) 空间。应用：将平均值约束转换成区间和非负，见 [最大平均值二分](04-binary-search.md#最大平均值整数二分--最小前缀和)。
+
 ## 一维差分
 
 d[0]=a[0]，d[i]=a[i]-a[i-1]。给 [l,r) 加 v，只要 d[l]+=v、d[r]-=v，再对差分求前缀和还原。
